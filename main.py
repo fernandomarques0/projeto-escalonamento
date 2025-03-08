@@ -11,10 +11,10 @@ def main():
     line = file.readline()
   for i in x:
     listOfProcesses.append(i)
-  print(listOfProcesses)
   file.close()
 
   fcfs(listOfProcesses)
+  rr(listOfProcesses)
 
 def fcfs(listOfProcesses):
   time = 0
@@ -22,6 +22,7 @@ def fcfs(listOfProcesses):
   cpu = None
   tres = 0
   tret = 0
+  tesp = 0
   nProcesses = len(listOfProcesses)
 
   while nProcesses > 0:
@@ -34,6 +35,7 @@ def fcfs(listOfProcesses):
           startTime = time
           endTime = startTime + cpu[1]
           tres = tres + (startTime - cpu[0])
+          tesp += (startTime - cpu[0]) 
           nProcesses = nProcesses - 1
 
     if cpu is not None and time == endTime:
@@ -45,16 +47,70 @@ def fcfs(listOfProcesses):
         startTime = time
         endTime = startTime + cpu[1]
         tres = tres + (startTime - cpu[0])
+        tesp += (startTime - cpu[0])
         nProcesses = nProcesses - 1
   
-    print(time, cpu, queue, tres, tret)
     time = time + 1
   
   if cpu is not None:
     tret = tret + (endTime - cpu[0])
 
-  print("Tres: ", tres/4)
-  print("Tret: ", tret/4)
+  tResMedio = tres/len(listOfProcesses)
+  tRetMedio = tret/len(listOfProcesses)
+  tEspMedio = tesp/len(listOfProcesses)
+
+  print("FCFS", round(tRetMedio, 1), round(tResMedio, 1), round(tEspMedio, 1))  
+
+def rr(listOfProcesses):
+  time = 0
+  queue = []
+  cpu = None
+  tres = 0  
+  tret = 0  
+  tesp = 0  
+  nProcesses = len(listOfProcesses)
+  quantum = 2
+
+  processes = [p.copy() for p in listOfProcesses]
+
+  while nProcesses > 0:
+      for x in listOfProcesses:
+          if x[0] == time:
+              x.append(0)  
+              queue.append(x)
+
+      if cpu is not None:
+          quantum -= 1
+          cpu[1] -= 1
+          cpu[2] += 1  
+
+          if cpu[1] == 0: 
+              endTime = time + 1
+              tret += (endTime - cpu[0] - 1) 
+              cpu = None
+              nProcesses -= 1
+              quantum = 2
+          elif quantum == 0:  
+              queue.append(cpu)
+              cpu = None
+              quantum = 2
+
+      if cpu is None and queue:
+          cpu = queue.pop(0)
+          quantum = 2
+          if cpu[2] == 0:  
+              startTime = time
+              tres += (startTime - cpu[0]) 
+
+      for p in queue:
+          tesp += 1  
+
+      time += 1
+
+  tResMedio = tres/len(listOfProcesses)
+  tRetMedio = tret/len(listOfProcesses)
+  tEspMedio = tesp/len(listOfProcesses)
+  print("RR", round(tRetMedio, 1), round(tResMedio, 1), round(tEspMedio, 1))  
 
 
 if __name__ == "__main__":
